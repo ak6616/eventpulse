@@ -89,6 +89,21 @@ export const orders = pgTable(
   ]
 );
 
+export const eventImages = pgTable(
+  "event_images",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    url: text("url").notNull(),
+    alt: text("alt"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_event_images_event").on(table.eventId)]
+);
+
 export const tickets = pgTable(
   "tickets",
   {

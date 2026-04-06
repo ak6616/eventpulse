@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { events, ticketTiers, users } from "@/db/schema";
+import { events, ticketTiers, users, eventImages } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { updateEventSchema } from "@/lib/validators";
-import { eq, and } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 export async function GET(
   _request: NextRequest,
@@ -33,7 +33,13 @@ export async function GET(
       .where(eq(users.id, event.organizerId))
       .limit(1);
 
-    return NextResponse.json({ event, ticketTiers: tiers, organizer });
+    const gallery = await db
+      .select()
+      .from(eventImages)
+      .where(eq(eventImages.eventId, event.id))
+      .orderBy(asc(eventImages.sortOrder));
+
+    return NextResponse.json({ event, ticketTiers: tiers, organizer, galleryImages: gallery });
   } catch (error) {
     console.error("Get event error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

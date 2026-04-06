@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { formatDate, formatCents } from "@/lib/utils";
 import { Calendar, MapPin, Users, Clock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { EventGallery } from "@/components/event-gallery";
 
 interface TicketTier {
   id: string;
@@ -32,6 +33,12 @@ interface EventDetail {
   coverImageUrl: string | null;
 }
 
+interface GalleryImage {
+  id: string;
+  url: string;
+  alt: string | null;
+}
+
 interface Organizer {
   id: string;
   name: string;
@@ -44,6 +51,7 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [tiers, setTiers] = useState<TicketTier[]>([]);
   const [organizer, setOrganizer] = useState<Organizer | null>(null);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [cart, setCart] = useState<Record<string, number>>({});
@@ -51,13 +59,14 @@ export default function EventDetailPage() {
   const [orderError, setOrderError] = useState("");
 
   useEffect(() => {
-    api<{ event: EventDetail; ticketTiers: TicketTier[]; organizer: Organizer }>(
+    api<{ event: EventDetail; ticketTiers: TicketTier[]; organizer: Organizer; galleryImages?: GalleryImage[] }>(
       `/api/events/${params.slug}`
     )
       .then((data) => {
         setEvent(data.event);
         setTiers(data.ticketTiers);
         setOrganizer(data.organizer);
+        setGalleryImages(data.galleryImages || []);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -166,6 +175,9 @@ export default function EventDetailPage() {
               {event.description}
             </div>
           )}
+
+          {/* Gallery */}
+          <EventGallery images={galleryImages} />
         </div>
 
         {/* Ticket selection sidebar */}
