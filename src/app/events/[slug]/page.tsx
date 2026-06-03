@@ -90,7 +90,7 @@ export default function EventDetailPage() {
         .map(([tierId, quantity]) => ({ tierId, quantity }));
 
       const data = await api<{ order: { id: string }; clientSecret: string }>(
-        `/api/events/${event!.id}/orders`,
+        `/api/events/${event!.slug}/orders`,
         { method: "POST", body: { items }, token: accessToken! }
       );
 

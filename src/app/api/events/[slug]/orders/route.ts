@@ -8,21 +8,23 @@ import { eq, and, sql } from "drizzle-orm";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const user = requireAuth(request);
-    const { id: eventId } = await params;
+    const { slug } = await params;
 
     const [event] = await db
       .select()
       .from(events)
-      .where(and(eq(events.id, eventId), eq(events.status, "published")))
+      .where(and(eq(events.slug, slug), eq(events.status, "published")))
       .limit(1);
 
     if (!event) {
       return NextResponse.json({ error: "Event not found or not on sale" }, { status: 404 });
     }
+
+    const eventId = event.id;
 
     const body = await request.json();
     const data = createOrderSchema.parse(body);
